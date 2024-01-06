@@ -155,6 +155,7 @@ void gameUpdate(Game* g) {
 			}
 			runStateOver(g);
 		default:
+			break;
 	}
 	if(g->firstFrame) g->firstFrame = false;
 	if(g->state != state) g->firstFrame = true;
