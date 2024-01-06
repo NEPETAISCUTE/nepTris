@@ -39,7 +39,11 @@ typedef enum _Piece {
 typedef struct _DynamicPiece {
 	Piece ID;
 	Vec2D pos;
+	Vec2D newPos;
 	uint8_t rot;
+	uint8_t newRot;
+
+	int8_t hardDropy;
 } DynamicPiece;
 
 extern const ColorPairName pieceClr[PIECE_CNT];

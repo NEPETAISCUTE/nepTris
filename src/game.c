@@ -30,9 +30,9 @@ void dbgSetBoard(Board b, const char* map, Vec2D offset, Vec2D size) {
 void gameReset(Game* g) {
 	memset(g->board, PIECE_NONE, sizeof(Board));
 	g->state = GSTATE_START;
-	g->pieceRot = GAME_SPAWNROT;
-	g->piecex = GAME_SPAWNX;
-	g->piecey = GAME_SPAWNY;
+	g->piece.rot = GAME_SPAWNROT;
+	g->piece.pos.x = GAME_SPAWNX;
+	g->piece.pos.y = GAME_SPAWNY;
 	g->swap = PIECE_NONE;
 	g->canSwap = true;
 	g->gravity = 1;
@@ -54,7 +54,7 @@ void gameReset(Game* g) {
 	g->scoreAddTimer = 0;
 	bagShuffle(&g->bag);
 
-	g->currentPiece = bagpick(&g->bag); //PIECE_T; 
+	g->piece.ID = bagpick(&g->bag); //PIECE_T; 
 	g->nextPiece = bagpick(&g->bag);
 	g->input = ERR;
 	g->holdBuffer = false;
@@ -214,9 +214,9 @@ void runStateGame(Game* g) {
 		return;
 	}
 	if(!g->isAnim) {
-		g->newPiecex = g->piecex;
-		g->newPiecey = g->piecey;
-		g->newPieceRot = g->pieceRot;
+		g->piece.newPos.x = g->piece.pos.x;
+		g->piece.newPos.y = g->piece.pos.y;
+		g->piece.newRot = g->piece.rot;
 
 		if(g->input == GK_ROTATE_CLW || g->input == GK_ROTATE_CCW) rotatePiece(g);
 
@@ -226,8 +226,8 @@ void runStateGame(Game* g) {
 		if(g->input == GK_G_UP) g->gravity++;
 		if(g->input == GK_G_DOWN) g->gravity--;
 
-		if(g->input == GK_LEFT) g->newPiecex = g->piecex - 1;
-		if(g->input == GK_RIGHT) g->newPiecex = g->piecex + 1;
+		if(g->input == GK_LEFT) g->piece.newPos.x = g->piece.pos.x - 1;
+		if(g->input == GK_RIGHT) g->piece.newPos.x = g->piece.pos.x + 1;
 
 
 		updateHorzPos(g);
@@ -253,8 +253,8 @@ void runStateGame(Game* g) {
 		if(g->dropTimer > 0) g->dropTimer--;
 			
 		drawBoard(g->boardWin, g->board);
-		if(g->chickenMode) drawTetraminoShadow(g->boardWin, g->piecex, g->hardDropy, g->currentPiece, g->pieceRot);
-		drawTetramino(g->boardWin, g->piecex, g->piecey, g->currentPiece, g->pieceRot);
+		if(g->chickenMode) drawTetraminoShadow(g->boardWin, &g->piece);
+		drawTetramino(g->boardWin, &g->piece);
 	} else {
 		if(g->input == GK_HOLD) g->holdBuffer = true;
 		drawBoard(g->boardWin, g->tmpBoard);
@@ -270,8 +270,8 @@ void runStateGame(Game* g) {
 		}
 	}
 	if(g->combo > 1) mvwprintw(g->scoreWin, 17, 1, "Combo X %lu", g->combo);
-	drawTetramino(g->scoreWin, SCOREWIN_WIDTH/2 - 6, 1, g->nextPiece, 0);
-	drawTetramino(g->scoreWin, SCOREWIN_WIDTH/2 - 6, 6, g->swap, 0);	
+	drawTetraminoHUD(g->scoreWin, g->nextPiece, SCOREWIN_WIDTH/2 - 6, 1, 0);
+	drawTetraminoHUD(g->scoreWin, g->swap, SCOREWIN_WIDTH/2 - 6, 6, 0);	
 	mvwprintw(g->scoreWin, 11, 1, "left %u", g->pcnt);
 	mvwprintw(g->scoreWin, 12, 1, "level %lu", g->gravity);
 	mvwprintw(g->scoreWin, 13, 1, "score");
@@ -300,23 +300,23 @@ void runStateOver(Game* g) {
 }
 
 void checkGameover(Game* g) {
-	if(collideBoard(g->board, g->currentPiece, g->newPieceRot, g->newPiecex, g->newPiecey)) g->state = GSTATE_OVER;
+	if(collideBoard(g->board, g->piece.ID, g->piece.newRot, g->piece.newPos.x, g->piece.newPos.y)) g->state = GSTATE_OVER;
 }
 
 void swapPiece(Game* g) {
 	if(!g->canSwap) return;
 	if(g->swap == PIECE_NONE) {
-		g->swap = g->currentPiece;
-		g->currentPiece = g->nextPiece;
+		g->swap = g->piece.ID;
+		g->piece.ID = g->nextPiece;
 		g->nextPiece = bagpick(&g->bag);
 	} else {
 		Piece tmp = g->swap;
-		g->swap = g->currentPiece;
-		g->currentPiece = tmp;
+		g->swap = g->piece.ID;
+		g->piece.ID = tmp;
 	}
-	g->piecex = g->newPiecex = GAME_SPAWNX;
-	g->piecey = g->newPiecey = GAME_SPAWNY;
-	g->pieceRot = g->newPieceRot = GAME_SPAWNROT;
+	g->piece.pos.x = g->piece.newPos.x = GAME_SPAWNX;
+	g->piece.pos.y = g->piece.newPos.y = GAME_SPAWNY;
+	g->piece.rot = g->piece.newRot = GAME_SPAWNROT;
 	g->canSwap = false;
 	g->isOnGround = false;
 	g->lockTimer = 30;
@@ -325,51 +325,51 @@ void swapPiece(Game* g) {
 }
 
 void rotatePiece(Game* g) {
-	if(g->input == GK_ROTATE_CLW) g->newPieceRot = (g->pieceRot + 1) & ROT_MAX;
-	else g->newPieceRot = (g->pieceRot - 1) & ROT_MAX;
+	if(g->input == GK_ROTATE_CLW) g->piece.newRot = (g->piece.rot + 1) & ROT_MAX;
+	else g->piece.newRot = (g->piece.rot - 1) & ROT_MAX;
 }
 
 void softDrop(Game* g, bool gravity) {
 	if(g->input == KEY_DOWN && !g->isOnGround) g->score++;
-	g->newPiecey = g->piecey + 1;
+	g->piece.newPos.y = g->piece.pos.y + 1;
 	g->gravcnt = 0;
 }
 
 void calcHardDropPos(Game* g) {
-	g->hardDropy = g->piecey;
-	while(!collideBoard(g->board, g->currentPiece, g->pieceRot, g->piecex, g->hardDropy) &&
-		  !collideVertBorders(g->currentPiece, g->pieceRot, g->hardDropy)) {
-			g->hardDropy++;
+	g->piece.hardDropy = g->piece.pos.y;
+	while(!collideBoard(g->board, g->piece.ID, g->piece.rot, g->piece.pos.x, g->piece.hardDropy) &&
+		  !collideVertBorders(g->piece.ID, g->piece.rot, g->piece.hardDropy)) {
+			g->piece.hardDropy++;
 	}
-	g->hardDropy--;
+	g->piece.hardDropy--;
 }
 
 void hardDrop(Game* g) {	
 	if(g->dropTimer != 0) return;
-	g->score += 2 * (g->hardDropy - g->newPiecey);
-	g->piecey = g->hardDropy;
-	g->newPiecey = g->hardDropy + 1;
+	g->score += 2 * (g->piece.hardDropy - g->piece.newPos.y);
+	g->piece.pos.y = g->piece.hardDropy;
+	g->piece.newPos.y = g->piece.hardDropy + 1;
 	g->isOnGround = true;
 	g->lockTimer = 0;
 	g->dropTimer = 10;
 }
 
 void updateHorzPos(Game* g) {
-	if(g->piecex == g->newPiecex && g->pieceRot == g->newPieceRot) return;
+	if(g->piece.pos.x == g->piece.newPos.x && g->piece.rot == g->piece.newRot) return;
 	bool isMovementPossible = false;
-	if(g->piecex != g->newPiecex) {
+	if(g->piece.pos.x != g->piece.newPos.x) {
 		g->tspin = TSPIN_NONE;
-		if(!collideHorzBorders(g->currentPiece, g->newPieceRot, g->newPiecex) &&
-		!collideBoard(g->board, g->currentPiece, g->newPieceRot, g->newPiecex, g->piecey)) {
-			g->piecex = g->newPiecex;
-			g->pieceRot = g->newPieceRot;
+		if(!collideHorzBorders(g->piece.ID, g->piece.newRot, g->piece.newPos.x) &&
+		!collideBoard(g->board, g->piece.ID, g->piece.newRot, g->piece.newPos.x, g->piece.pos.y)) {
+			g->piece.pos.x = g->piece.newPos.x;
+			g->piece.rot = g->piece.newRot;
 			isMovementPossible = true;
 		}
 	} else isMovementPossible = handleRot(g);
 	if(isMovementPossible && g->isOnGround && g->moveResetCnt > 0) {
 		g->moveResetCnt--;
-		g->isOnGround = collideVertBorders(g->currentPiece, g->pieceRot, g->piecey+1) ||
-						collideBoard(g->board, g->currentPiece, g->pieceRot, g->piecex, g->piecey + 1);
+		g->isOnGround = collideVertBorders(g->piece.ID, g->piece.rot, g->piece.pos.y+1) ||
+						collideBoard(g->board, g->piece.ID, g->piece.rot, g->piece.pos.x, g->piece.pos.y + 1);
 		g->lockTimer = 30;
 	}
 }
@@ -380,20 +380,20 @@ void dbgBrk() {
 
 bool handleRot(Game* g) {
 	KickTable* kicks = &kickTable;
-	if(g->currentPiece == PIECE_I) kicks = &kickTableI;
-	bool isCCL = (g->pieceRot == 0 && g->newPieceRot == 3) || (g->newPieceRot < g->pieceRot && !(g->pieceRot == 3 && g->newPieceRot == 0));
+	if(g->piece.ID == PIECE_I) kicks = &kickTableI;
+	bool isCCL = (g->piece.rot == 0 && g->piece.newRot == 3) || (g->piece.newRot < g->piece.rot && !(g->piece.rot == 3 && g->piece.newRot == 0));
 	for(int i = 0; i < 5; i++) {
-		Vec2D pos = (*kicks)[(g->pieceRot - isCCL)&ROT_MAX][i];
+		Vec2D pos = (*kicks)[(g->piece.rot - isCCL)&ROT_MAX][i];
 		if(isCCL) {pos.x = -pos.x; pos.y = -pos.y;}
-		if(!collideHorzBorders(g->currentPiece, g->newPieceRot, g->newPiecex + pos.x) &&
-		   !collideBoard(g->board, g->currentPiece, g->newPieceRot, g->newPiecex + pos.x, g->newPiecey + pos.y) &&
-		   !collideVertBorders(g->currentPiece, g->newPieceRot, g->newPiecey + pos.y)) {
-			g->piecex = g->newPiecex + pos.x;
-			g->newPiecex = g->piecex;
-			g->pieceRot = g->newPieceRot;
-			g->piecey = g->newPiecey + pos.y;
-			g->newPiecey = g->piecey;
-			if(g->currentPiece == PIECE_T) g->tspin = checkTSpin(g->board, g->pieceRot, g->piecex, g->newPiecey);
+		if(!collideHorzBorders(g->piece.ID, g->piece.newRot, g->piece.newPos.x + pos.x) &&
+		   !collideBoard(g->board, g->piece.ID, g->piece.newRot, g->piece.newPos.x + pos.x, g->piece.newPos.y + pos.y) &&
+		   !collideVertBorders(g->piece.ID, g->piece.newRot, g->piece.newPos.y + pos.y)) {
+			g->piece.pos.x = g->piece.newPos.x + pos.x;
+			g->piece.newPos.x = g->piece.pos.x;
+			g->piece.rot = g->piece.newRot;
+			g->piece.pos.y = g->piece.newPos.y + pos.y;
+			g->piece.newPos.y = g->piece.pos.y;
+			if(g->piece.ID == PIECE_T) g->tspin = checkTSpin(g->board, g->piece.rot, g->piece.pos.x, g->piece.newPos.y);
 			return true;
 		}
 	}
@@ -401,16 +401,16 @@ bool handleRot(Game* g) {
 }
 
 void checkGround(Game* g) {
-	g->isOnGround = collideVertBorders(g->currentPiece, g->pieceRot, g->piecey+1) ||
-					collideBoard(g->board, g->currentPiece, g->pieceRot, g->piecex, g->piecey + 1);
+	g->isOnGround = collideVertBorders(g->piece.ID, g->piece.rot, g->piece.pos.y+1) ||
+					collideBoard(g->board, g->piece.ID, g->piece.rot, g->piece.pos.x, g->piece.pos.y + 1);
 }
 
 void updateVertPos(Game* g) {
-	if(g->piecey == g->newPiecey && !g->isOnGround) return;
-	if(!collideVertBorders(g->currentPiece, g->pieceRot, g->newPiecey) &&
-	   !collideBoard(g->board, g->currentPiece, g->pieceRot, g->piecex, g->newPiecey) &&
+	if(g->piece.pos.y == g->piece.newPos.y && !g->isOnGround) return;
+	if(!collideVertBorders(g->piece.ID, g->piece.rot, g->piece.newPos.y) &&
+	   !collideBoard(g->board, g->piece.ID, g->piece.rot, g->piece.pos.x, g->piece.newPos.y) &&
 	   !g->isOnGround) {
-		g->piecey = g->newPiecey;
+		g->piece.pos.y = g->piece.newPos.y;
 		g->tspin = TSPIN_NONE;
 		return;
 	}
@@ -419,7 +419,7 @@ void updateVertPos(Game* g) {
 		g->lockTimer--;
 		return;
 	}
-	placeTiles(g->board, g->currentPiece, g->pieceRot, g->piecex, g->piecey);
+	placeTiles(g->board, g->piece.ID, g->piece.rot, g->piece.pos.x, g->piece.pos.y);
 	g->isAllClear = false;
 	int lnCnt = handleLines(g);
 	if(lnCnt != 0) {
@@ -504,11 +504,11 @@ void getNewPiece(Game* g) {
 		g->state = GSTATE_OVER;
 		return;
 	}
-	g->currentPiece = g->nextPiece;
+	g->piece.ID = g->nextPiece;
 	g->nextPiece = bagpick(&g->bag);
-	g->piecex = GAME_SPAWNX;
-	g->piecey = GAME_SPAWNY;
-	g->pieceRot = GAME_SPAWNROT;
+	g->piece.pos.x = GAME_SPAWNX;
+	g->piece.pos.y = GAME_SPAWNY;
+	g->piece.rot = GAME_SPAWNROT;
 	g->canSwap = true;
 	g->pcnt--;
 	if(g->pcnt == 0) {

@@ -67,10 +67,7 @@ typedef struct _Game {
 	bool chickenMode;
 	bool isPaused;
 
-	Piece currentPiece;
-	uint8_t pieceRot;
-	int8_t piecex;
-	int8_t piecey;
+	DynamicPiece piece;
 
 	TSpinType tspin;
 	char* specialActName;
@@ -84,12 +81,6 @@ typedef struct _Game {
 	uint8_t moveResetCnt;
 
 	bool isAllClear;
-
-	int8_t hardDropy;
-
-	int8_t newPiecex;
-	int8_t newPiecey;
-	int8_t newPieceRot;
 
 	Piece nextPiece;
 	Piece swap;

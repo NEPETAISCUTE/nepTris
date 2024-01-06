@@ -10,36 +10,54 @@ void wStopUsePair(WINDOW* win, int pair) {
 	if(can_change_color() && COLORS > 8 && COLOR_PAIRS > 8) wattroff(win, COLOR_PAIR(pair));
 }
 
-void drawTetramino(WINDOW* win, int x, int y, Piece piece, uint8_t rot) {
-	if(piece == PIECE_NONE) return;
+void drawTetramino(WINDOW* win, DynamicPiece* p) {
+	if(p->ID == PIECE_NONE) return;
 	if(win == NULL) win = stdscr;
-	rot = rot & 3;
-	move(y, x);
+	p->rot = p->rot & 3;
+	move(p->pos.y, p->pos.x);
 	for(int i = 0; i < 4; i++) {
 		for(int j = 0; j < 4; j++) {
-			if(pieceGfx[piece-1][rot][i * 4 + j] == 'X') {
-				if(y+i < 0 || (x * 2) + (j * 2) < 0) continue;
-				wUsePair(win, pieceClr[piece]);
-	 			mvwaddch(win, y + i + 1, (x * 2) + (j * 2) + 1, ' ');
-				mvwaddch(win, y + i + 1, (x * 2) + (j * 2) + 2, ' ');
-		   		wStopUsePair(win, pieceClr[piece]);
+			if(pieceGfx[p->ID-1][p->rot][i * 4 + j] == 'X') {
+				if(p->pos.y+i < 0 || (p->pos.x * 2) + (j * 2) < 0) continue;
+				wUsePair(win, pieceClr[p->ID]);
+	 			mvwaddch(win, p->pos.y + i + 1, (p->pos.x * 2) + (j * 2) + 1, ' ');
+				mvwaddch(win, p->pos.y + i + 1, (p->pos.x * 2) + (j * 2) + 2, ' ');
+		   		wStopUsePair(win, pieceClr[p->ID]);
 			}
 		}
 	}
 }
 
-void drawTetraminoShadow(WINDOW* win, int x, int y, Piece piece, uint8_t rot) {
-	if(piece == PIECE_NONE) return;
+void drawTetraminoHUD(WINDOW* win, Piece ID, int8_t posx, int8_t posy, int8_t rot) {
+	if(ID == PIECE_NONE) return;
 	if(win == NULL) win = stdscr;
 	rot = rot & 3;
-	move(y, x);
+	move(posy, posx);
 	for(int i = 0; i < 4; i++) {
 		for(int j = 0; j < 4; j++) {
-			if(pieceGfx[piece-1][rot][i * 4 + j] == 'X') {
-				if(y+i < 0 || (x * 2) + (j * 2) < 0) continue;
+			if(pieceGfx[ID-1][rot][i * 4 + j] == 'X') {
+				if(posy+i < 0 || (posx * 2) + (j * 2) < 0) continue;
+				wUsePair(win, pieceClr[ID]);
+	 			mvwaddch(win, posy + i + 1, (posx * 2) + (j * 2) + 1, ' ');
+				mvwaddch(win, posy + i + 1, (posx * 2) + (j * 2) + 2, ' ');
+		   		wStopUsePair(win, pieceClr[ID]);
+			}
+		}
+	}
+}
+
+void drawTetraminoShadow(WINDOW* win, DynamicPiece* p) {
+	if(p->ID == PIECE_NONE) return;
+	if(win == NULL) win = stdscr;
+	p->rot = p->rot & 3;
+	move(p->hardDropy, p->pos.x);
+	for(int i = 0; i < 4; i++) {
+		for(int j = 0; j < 4; j++) {
+			if(pieceGfx[p->ID-1][p->rot][i * 4 + j] == 'X') {
+				if(p->pos.y+i < 0 || (p->pos.x * 2) + (j * 2) < 0) continue;
 				wUsePair(win, PAIR_SHADOW);
-	 			mvwaddch(win, y + i + 1, (x * 2) + (j * 2) + 1, ' ');
-				mvwaddch(win, y + i + 1, (x * 2) + (j * 2) + 2, ' ');
+	 			mvwaddch(win, p->hardDropy + i + 1, (p->pos.x * 2) + (j * 2) + 1, ' ');
+				mvwaddch(win, p->hardDropy + i + 1, (p->pos.x * 2) + (j * 2) + 2, ' ');
 		   		wStopUsePair(win, PAIR_SHADOW);
 			}
 		}
