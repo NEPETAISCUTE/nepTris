@@ -2,6 +2,8 @@
 
 my own version of tetris, made using libncurses
 
+for now, works only on linux, i'll see for windows someday though!
+
 how to compile:
 
 "make" to compile the source (requires the dev package for ncurses)
