@@ -1,5 +1,5 @@
 CC     := gcc
-CFLAGS := -Wall -Oz
+CFLAGS := -Wall -O3
 DFLAGS := -Wall -g
 LIBS   := -lncurses
 LD     := gcc
