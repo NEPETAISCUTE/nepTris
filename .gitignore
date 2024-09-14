@@ -2,3 +2,4 @@
 *.d
 nepTris
 nepTris_debug
+.ccls-cache
