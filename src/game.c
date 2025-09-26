@@ -275,7 +275,7 @@ void runStateGame(Game *g) {
       fallSpeed = 60 - (g->gravity - 1) * 3;
     else
       fallSpeed = 0;
-    if (g->gravcnt >= fallSpeed || g->input == KEY_DOWN)
+    if (g->gravcnt >= fallSpeed || g->input == GK_SOFT_DROP)
       softDrop(g, g->input >= fallSpeed);
     if (g->gravity != g->lastGravity) {
       g->lastGravity = g->gravity;
