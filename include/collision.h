@@ -1,10 +1,10 @@
 #ifndef COLLISION_H
 #define COLLISION_H
 
-#include <util.h>
-#include <pieces.h>
-#include <stdbool.h>
-#include <board.h>
+#include "util.h"
+#include "pieces.h"
+#include "stdbool.h"
+#include "board.h"
 
 typedef enum _TSpinTypes {
 	TSPIN_NONE = 0,

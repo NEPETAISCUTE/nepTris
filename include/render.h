@@ -1,8 +1,8 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#include <pieces.h>
-#include <game.h>
+#include "pieces.h"
+#include "game.h"
 
 #define FRAME_RATE 1000/60
 

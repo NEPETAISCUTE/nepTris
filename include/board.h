@@ -4,7 +4,7 @@
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 22
 
-#include <pieces.h>
+#include "pieces.h"
 
 typedef Piece Board[BOARD_HEIGHT][BOARD_WIDTH];
 

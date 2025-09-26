@@ -1,8 +1,8 @@
-#include <color.h>
-#include <game.h>
-#include <render.h>
-#include <save.h>
-#include <util.h>
+#include "color.h"
+#include "game.h"
+#include "render.h"
+#include "save.h"
+#include "util.h"
 
 #ifdef DEBUG
 const Vec2D ttsmapOffset = {0, 17};

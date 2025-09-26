@@ -1,4 +1,4 @@
-#include <collision.h>
+#include "collision.h"
 
 KickTable kickTable = {
 	{{0,0}, {-1,0}, {-1,-1}, {0,2}, {-1,2}},

@@ -1,4 +1,4 @@
-#include <pieces.h>
+#include "pieces.h"
 
 const ColorPairName pieceClr[PIECE_CNT] = {
 	[PIECE_NONE] = COLOR_DEFAULT, //none

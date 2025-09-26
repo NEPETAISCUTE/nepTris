@@ -1,8 +1,9 @@
-#include <bag.h>
+#include "bag.h"
+
+#include "neprand.h"
 
 void bagInit(Bag* b) {
-	b->rctx.randrsl[0] = time(NULL);
-	randinit(&b->rctx, TRUE);
+	srand(time(NULL));
 	for(int i = 0; i < BAG_SIZE; i++) {
 		b->bag[i] = i+1;
 	}
@@ -10,8 +11,8 @@ void bagInit(Bag* b) {
 
 void bagShuffle(Bag* b) {
 	for(int i = 0; i < BAG_SIZE*BAG_SIZE; i++) {
-		int firstIdx = RANDRANGE(&b->rctx, 0, BAG_SIZE);
-	 	int secondIdx = RANDRANGE(&b->rctx, 0, BAG_SIZE);
+		int firstIdx = RANDRANGE(0, BAG_SIZE);
+	 	int secondIdx = RANDRANGE(0, BAG_SIZE);
 		Piece tmp = b->bag[firstIdx];
 		b->bag[firstIdx] = b->bag[secondIdx];
 		b->bag[secondIdx] = tmp;

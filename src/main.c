@@ -1,9 +1,9 @@
 #include <ncurses.h>
 
-#include <render.h>
-#include <game.h>
-#include <unistd.h>
-#include <util.h>
+#include "render.h"
+#include "game.h"
+#include "unistd.h"
+#include "util.h"
 
 int main() {
 	Game* g = gameInit();

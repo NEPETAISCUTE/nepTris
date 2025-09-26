@@ -1,4 +1,4 @@
-#include <render.h>
+#include "render.h"
 
 void wUsePair(WINDOW* win, int pair) {
 	if(win == NULL) win = stdscr;

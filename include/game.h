@@ -7,11 +7,10 @@
 #include <time.h>
 #include <string.h>
 
-#include <keys.h>
-#include <bag.h>
-#include <pieces.h>
-#include <collision.h>
-#include <rand.h>
+#include "keys.h"
+#include "bag.h"
+#include "pieces.h"
+#include "collision.h"
 
 #define VERSION "1.1.0"
 

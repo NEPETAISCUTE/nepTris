@@ -1,4 +1,4 @@
-#include <board.h>
+#include "board.h"
 
 void placeTiles(Board board, Piece p, uint8_t rot, int8_t piecex, int8_t piecey) {
 	for(int i = 0; i < 4; i++) {

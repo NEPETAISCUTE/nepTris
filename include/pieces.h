@@ -2,8 +2,9 @@
 #define PIECES_H
 
 #include <ncurses.h>
-#include <color.h>
-#include <util.h>
+
+#include "color.h"
+#include "util.h"
 
 #define ROT_MAX 3
 #define ROT_CNT 4

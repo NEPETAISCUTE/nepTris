@@ -1,4 +1,5 @@
-#include <color.h>
+#include "color.h"
+
 #include <ncurses.h>
 
 void saveColors(Color c[COLCNT]) {
